@@ -1,0 +1,21 @@
+{
+  "name": "blockchain-kyc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "abdillah zakariyya <zakariyyaopeyemi@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "ganache": "ganache-cli --deterministic",
+    "compile": "truffle compile --all",
+    "test": "truffle test"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.4.0",
+    "@openzeppelin/test-helpers": "^0.5.10",
+    "@truffle/hdwallet-provider": "^1.2.3",
+    "chai": "^4.3.4",
+    "dotenv": "^8.2.0",
+    "ganache-cli": "^6.12.2",
+    "truffle": "^5.2.4"
+  }
+}
