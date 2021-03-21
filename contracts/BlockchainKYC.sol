@@ -74,7 +74,7 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
     function accredite(uint256 _userId) external onlyOwner returns(bool) {
         address _user = ownerOf(_userId);
         require(!persons[_user].accredited, "BlockchainKYC: account has already been accredited");
-        persons[_user].accredited = !persons[_user].accredited;
+        persons[_user].accredited = true;
         return true;
     }
 
