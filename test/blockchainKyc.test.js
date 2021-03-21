@@ -49,10 +49,9 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
     
     describe('ownerOf', () => {
         const _isPrivate = true;
-        const _isAccredited = true;
 
         beforeEach(async () => {
-            await this.contract.registerUser(deployer, 'TokenURI', _isPrivate, _isAccredited, { from: deployer });
+            await this.contract.registerUser(deployer, 'TokenURI', _isPrivate, { from: deployer });
         })
 
         it('should return of a token Id', async () => {
@@ -73,10 +72,9 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
     
     describe('tokenURI', () => {
         const isPrivate = true;
-        const isAccredited = true;
         
         beforeEach(async () => {
-            await this.contract.registerUser(deployer, 'TokenURI', isPrivate, isAccredited, { from: deployer })
+            await this.contract.registerUser(deployer, 'TokenURI', isPrivate, { from: deployer })
         })
 
         it('should return tokenURI', async () => {
@@ -99,11 +97,10 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
         const _tokenURI = "TokenURI";
         const _tokenId = "1";
         const isPrivate = true;
-        const isAccredited = true;
 
 
         beforeEach(async () => {
-            await this.contract.registerUser(deployer, _tokenURI, isPrivate, isAccredited,{ from: deployer });
+            await this.contract.registerUser(deployer, _tokenURI, isPrivate,{ from: deployer });
         })
 
         it('should set approval properly', async () => {
@@ -133,10 +130,9 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
 
     describe('setApprovalForAll', () => {
         const isPrivate = true;
-        const isAccredited = true;
 
         beforeEach(async () => {
-            await this.contract.registerUser(deployer, "TOkenURI", isPrivate, isAccredited, { from: deployer });
+            await this.contract.registerUser(deployer, "TOkenURI", isPrivate, { from: deployer });
             await this.contract.setApprovalForAll(user1, true, { from: deployer });
         })
 
@@ -157,10 +153,9 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
 
     describe('registerUser', () => {
         const _isPrivate = true;
-        const _isAccredited = true;
 
         beforeEach(async () => {
-            await this.contract.registerUser(deployer, 'TokenURI', _isPrivate, _isAccredited, { from: deployer });
+            await this.contract.registerUser(deployer, 'TokenURI', _isPrivate, { from: deployer });
         })
 
         it('should award new item to user', async () => {
@@ -178,7 +173,7 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
             expect(user).to.equal(deployer);
             expect(tokenId.toString()).to.equal('1');
             expect(isPrivate).to.equal(_isPrivate);
-            expect(accredited).to.equal(_isAccredited);
+            expect(accredited).to.equal(true);
         })
     })
 })

@@ -31,7 +31,7 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
         revert("Direct ETH transfer is not allowed");
     }
 
-    function registerUser(address _player, string memory _tokenURI, bool _isPrivate, bool _isAccredited) public onlyOwner returns(uint256 _newUserId) {
+    function registerUser(address _player, string memory _tokenURI, bool _isPrivate) public onlyOwner returns(uint256 _newUserId) {
         require(persons[_msgSender()].user == address(0), "Account have already been created");
         tokenIds.increment();
 
@@ -42,7 +42,7 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
             _player,
             _newUserId,
             _isPrivate,
-            _isAccredited
+            true
         );
         return _newUserId;
     }
