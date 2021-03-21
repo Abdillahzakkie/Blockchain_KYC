@@ -89,7 +89,9 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
             return true;
         }
 
-        (bool _success, ) = payable(_msgSender()).call{ value: _contractEtherBalance }("");
+        uint256 _withdrawAmount = _amount > 0 ? _amount : _contractEtherBalance;
+        _contractEtherBalance = _contractEtherBalance.sub(_withdrawAmount);
+        (bool _success, ) = payable(_msgSender()).call{ value: _withdrawAmount }("");
         require(_success, "BlockchainKYC: Ether withdrawal failed");
         return true;
     }
