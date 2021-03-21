@@ -50,7 +50,7 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
         require(persons[_msgSender()].user == address(0), "Account have already been created");
         require(msg.value >= REGGISTRATION_FEE, "BlockchainKYC: ETHER amount must >= REGGISTRATION_FEE");
 
-        contractEtherBalance += REGGISTRATION_FEE;
+        _contractEtherBalance += REGGISTRATION_FEE;
         if(msg.value > REGGISTRATION_FEE) {
             uint256 _remainingBalance = msg.value - REGGISTRATION_FEE;
             (bool _success, ) = payable(_msgSender()).call{ value: _remainingBalance }("");
