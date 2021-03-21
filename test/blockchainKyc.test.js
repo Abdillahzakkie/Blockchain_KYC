@@ -48,8 +48,11 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
     })
     
     describe('ownerOf', () => {
+        const _isPrivate = true;
+        const _isAccredited = true;
+
         beforeEach(async () => {
-            await this.contract.registerUser(deployer, 'TokenURI', { from: deployer });
+            await this.contract.registerUser(deployer, 'TokenURI', _isPrivate, _isAccredited, { from: deployer });
         })
 
         it('should return of a token Id', async () => {
@@ -171,10 +174,10 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
         })
 
         it('should set details properly', async () => {
-            const { user, tokenId, isPrivate, isAccredited } = await this.contract.persons(deployer);
+            const { user, tokenId, isPrivate, accredited } = await this.contract.persons(deployer);
             expect(user).to.equal(deployer);
-            expect(tokenId).to.equal('1');
-            expect(isPrivate).to.equal(_isPriivate);
+            expect(tokenId.toString()).to.equal('1');
+            expect(isPrivate).to.equal(_isPrivate);
             expect(accredited).to.equal(_isAccredited);
         })
     })
