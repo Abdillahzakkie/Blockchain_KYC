@@ -5,9 +5,10 @@ pragma solidity 0.6.12;
 import "@openzeppelin/contracts/token/ERC721/ERC721Pausable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
+import "@openzeppelin/contracts/math/SafeMath.sol";
 contract BlockchainKYC is ERC721Pausable, Ownable  {
     using Counters for Counters.Counter;
+    using SafeMath for uint256;
     Counters.Counter public tokenIds;
     uint256 private REGGISTRATION_FEE;
     uint256 private _contractEtherBalance;
@@ -50,9 +51,9 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
         require(persons[_msgSender()].user == address(0), "Account have already been created");
         require(msg.value >= REGGISTRATION_FEE, "BlockchainKYC: ETHER amount must >= REGGISTRATION_FEE");
 
-        _contractEtherBalance += REGGISTRATION_FEE;
+        _contractEtherBalance = _contractEtherBalance.add(REGGISTRATION_FEE);
         if(msg.value > REGGISTRATION_FEE) {
-            uint256 _remainingBalance = msg.value - REGGISTRATION_FEE;
+            uint256 _remainingBalance = msg.value.sub(REGGISTRATION_FEE);
             (bool _success, ) = payable(_msgSender()).call{ value: _remainingBalance }("");
             require(_success, "BlockchainKYC: Error while transfering exccess REGGISTRATION_FEE");
         }
@@ -73,6 +74,7 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
     function accredite(uint256 _userId) external onlyOwner returns(bool) {
         address _user = ownerOf(_userId);
         require(!persons[_user].accredited, "BlockchainKYC: account has already been accredited");
+        persons[_user].accredited = !persons[_user].accredited;
         return true;
     }
 
@@ -81,9 +83,15 @@ contract BlockchainKYC is ERC721Pausable, Ownable  {
         return _contractEtherBalance;
     }
 
-    function withdraw() external onlyOwner returns(bool) {
+    function withdraw(address _tokenAddress, uint256 _amount) external onlyOwner returns(bool) {
+        if(_tokenAddress != address(0) && _amount > 0) {
+            (bool _success, ) = _tokenAddress.call{ value: 0 }(abi.encodeWithSignature("transfer(address,uint256)", _msgSender(), _amount));
+            require(_success, "BlockchainKYC: Error while interracting with token contract");
+            return true;
+        }
+
         (bool _success, ) = payable(_msgSender()).call{ value: _contractEtherBalance }("");
-        require(_success, "BlockchainKYC: Ether transfer failed");
+        require(_success, "BlockchainKYC: Ether withdrawal failed");
         return true;
     }
 }
