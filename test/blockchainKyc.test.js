@@ -1,13 +1,13 @@
-const GameItem = artifacts.require('GameItem');
+const BlockchainKYC = artifacts.require('BlockchainKYC');
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers/src/constants');
 const { expect, assert } = require('chai');
 
-contract('GameItem', async ([deployer, user1, user2]) => {
-    const _name = "GameItem";
+contract('BlockchainKYC', async ([deployer, user1, user2]) => {
+    const _name = "BlockchainKYC";
     const _symbol = "ITM";
 
     beforeEach(async () => {
-        this.contract = await GameItem.new(_name, _symbol, { from: deployer });
+        this.contract = await BlockchainKYC.new(_name, _symbol, { from: deployer });
     })
 
     describe('deployment', () => {
@@ -49,7 +49,7 @@ contract('GameItem', async ([deployer, user1, user2]) => {
     
     describe('ownerOf', () => {
         beforeEach(async () => {
-            await this.contract.awardItem(deployer, 'TokenURI', { from: deployer });
+            await this.contract.registerUser(deployer, 'TokenURI', { from: deployer });
         })
 
         it('should return of a token Id', async () => {
@@ -69,8 +69,11 @@ contract('GameItem', async ([deployer, user1, user2]) => {
     })
     
     describe('tokenURI', () => {
+        const isPrivate = true;
+        const isAccredited = true;
+        
         beforeEach(async () => {
-            await this.contract.awardItem(deployer, 'TokenURI', { from: deployer })
+            await this.contract.registerUser(deployer, 'TokenURI', isPrivate, isAccredited, { from: deployer })
         })
 
         it('should return tokenURI', async () => {
@@ -92,10 +95,12 @@ contract('GameItem', async ([deployer, user1, user2]) => {
     describe('approve', () => {
         const _tokenURI = "TokenURI";
         const _tokenId = "1";
+        const isPrivate = true;
+        const isAccredited = true;
 
 
         beforeEach(async () => {
-            await this.contract.awardItem(deployer, _tokenURI, { from: deployer });
+            await this.contract.registerUser(deployer, _tokenURI, isPrivate, isAccredited,{ from: deployer });
         })
 
         it('should set approval properly', async () => {
@@ -124,8 +129,11 @@ contract('GameItem', async ([deployer, user1, user2]) => {
     })
 
     describe('setApprovalForAll', () => {
+        const isPrivate = true;
+        const isAccredited = true;
+
         beforeEach(async () => {
-            await this.contract.awardItem(deployer, "TOkenURI", { from: deployer });
+            await this.contract.registerUser(deployer, "TOkenURI", isPrivate, isAccredited, { from: deployer });
             await this.contract.setApprovalForAll(user1, true, { from: deployer });
         })
 
@@ -144,9 +152,12 @@ contract('GameItem', async ([deployer, user1, user2]) => {
     
 
 
-    describe('awardItem', () => {
+    describe('registerUser', () => {
+        const _isPrivate = true;
+        const _isAccredited = true;
+
         beforeEach(async () => {
-            await this.contract.awardItem(deployer, 'TokenURI', { from: deployer });
+            await this.contract.registerUser(deployer, 'TokenURI', _isPrivate, _isAccredited, { from: deployer });
         })
 
         it('should award new item to user', async () => {
@@ -157,6 +168,14 @@ contract('GameItem', async ([deployer, user1, user2]) => {
         it('should set token owner properly', async () => {
             const ownerOf = await this.contract.ownerOf('1');
             expect(ownerOf).to.equal(deployer);
+        })
+
+        it('should set details properly', async () => {
+            const { user, tokenId, isPrivate, isAccredited } = await this.contract.persons(deployer);
+            expect(user).to.equal(deployer);
+            expect(tokenId).to.equal('1');
+            expect(isPrivate).to.equal(_isPriivate);
+            expect(accredited).to.equal(_isAccredited);
         })
     })
 })

@@ -1,5 +1,5 @@
-const GameItem = artifacts.require('GameItem');
+const BlockchainKYC = artifacts.require('BlockchainKYC');
 
 module.exports = async (deployer, network, accounts) => {
-    await deployer.deploy(GameItem, 'GameItem', 'ITM', { from: accounts[0] });
+    await deployer.deploy(BlockchainKYC, 'GameItem', 'ITM', { from: accounts[0] });
 }
