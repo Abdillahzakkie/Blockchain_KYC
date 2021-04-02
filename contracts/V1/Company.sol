@@ -2,16 +2,17 @@
 pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
 
-contract Company is Ownable  {
+contract Company is Context {
     using Counters for Counters.Counter;
     using SafeMath for uint256;
     Counters.Counter public tokenIds;
 
     string public name;
+    address public admin;
     uint8 private _initialize;
 
     mapping(address => Member) public members;
@@ -26,6 +27,11 @@ contract Company is Ownable  {
         require(_initialize == 0, "Contract has already been initialized");
         _;
         _initialize = 1;
+    }
+
+    modifier onlyOwner() {
+        require(_msgSender() == admin, "Ownable: caller is not the owner");
+        _;
     }
 
     event NewAccountCreated(
@@ -54,8 +60,9 @@ contract Company is Ownable  {
         revert("BlockchainKYC: Direct ETH transfer is not allowed");
     }
 
-    function initialize(string calldata _name) external onlyOwner initializer {
+    function initialize(string calldata _name) external initializer {
         name = _name;
+        admin = _msgSender();
     }
 
     function registerNewUser(address _account, string memory _role) public onlyOwner {

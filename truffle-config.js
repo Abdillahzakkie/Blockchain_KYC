@@ -71,6 +71,6 @@ module.exports = {
   // those previously migrated contracts available in the .db directory, you will need to run the following:
   // $ truffle migrate --reset --compile-all
   db: {
-    enabled: true
+    enabled: false
   }
 };

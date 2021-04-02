@@ -51,11 +51,12 @@ contract VProof is ERC721, Ownable  {
         revert("VProof: Direct ETH transfer is not allowed");
     }
 
-    function deployInstance(string calldata name) internal returns(address payable) {
+    function deployInstance(string calldata _name) internal returns(address payable) {
         address payable clone = payable(Clones.clone(companyImplementation));
-        Company(clone).initialize(name);
+        Company(clone).initialize(_name);
         return clone;
     }
+    
     function createPrivateAccount(string calldata _name, string memory _tokenURI) external payable {
         require(persons[_msgSender()].account == address(0), "VProof: Duplicate registration found!");
         bool _isPrivate = true;
@@ -82,7 +83,7 @@ contract VProof is ERC721, Ownable  {
         emit NewComapanyCreated(_msgSender(), _account, _id, block.timestamp);
     }
 
-    function _createAccount(string calldata _name, string memory _tokenURI, bool _isPrivate) internal returns(uint256, address) {
+    function _createAccount(string calldata _name, string memory _tokenURI, bool _private) internal returns(uint256, address) {
         require(msg.value >= REGISTRATION_FEE, "VProof: ETHER amount must >= REGISTRATION_FEE");
         require(nameToUser[_name] == 0, "VProof: Name has already been taken");
         require(!isNull(_name), "VProof: 'Name' must not be blank");
@@ -103,7 +104,7 @@ contract VProof is ERC721, Ownable  {
         _setTokenURI(_id, _tokenURI);
         nameToUser[_name] = _id;
 
-        if(!_isPrivate) _account = deployInstance(_name);
+        if(!_private) _account = deployInstance(_name);
         return (_id, _account);
     }
 
