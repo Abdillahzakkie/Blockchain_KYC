@@ -3,13 +3,12 @@ pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-
-import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./Company.sol";
 
-contract BlockchainKYC is ERC721, Ownable  {
+contract VProof is ERC721, Ownable  {
     using Counters for Counters.Counter;
     using SafeMath for uint256;
     Counters.Counter public tokenIds;
@@ -21,6 +20,7 @@ contract BlockchainKYC is ERC721, Ownable  {
 
     mapping(address => Person) public persons;
     mapping(address => mapping(address => Person)) public companies;
+    mapping(string => uint256) public nameToUser;
 
     struct Person {
         address account;
@@ -48,7 +48,7 @@ contract BlockchainKYC is ERC721, Ownable  {
     }
 
     receive() external payable {
-        revert("BlockchainKYC: Direct ETH transfer is not allowed");
+        revert("VProof: Direct ETH transfer is not allowed");
     }
 
     function deployInstance(string calldata name) internal returns(address payable) {
@@ -57,7 +57,7 @@ contract BlockchainKYC is ERC721, Ownable  {
         return clone;
     }
     function createPrivateAccount(string calldata _name, string memory _tokenURI) external payable {
-        require(persons[_msgSender()].account == address(0), "BlockchainKYC: Duplicate registration found!");
+        require(persons[_msgSender()].account == address(0), "VProof: Duplicate registration found!");
         bool _isPrivate = true;
         (uint256 _id, ) = _createAccount(_name, _tokenURI, _isPrivate);
         persons[_msgSender()] = Person(
@@ -69,7 +69,7 @@ contract BlockchainKYC is ERC721, Ownable  {
     }
 
     function createBussinessAccount(string calldata _name, string memory _tokenURI) external payable {
-        require(persons[_msgSender()].account != address(0), "BlockchainKYC: User not registered");
+        require(persons[_msgSender()].account != address(0), "VProof: User not registered");
 
         bool _isPrivate = false;
         (uint256 _id, address _account) = _createAccount(_name, _tokenURI, _isPrivate);
@@ -83,8 +83,9 @@ contract BlockchainKYC is ERC721, Ownable  {
     }
 
     function _createAccount(string calldata _name, string memory _tokenURI, bool _isPrivate) internal returns(uint256, address) {
-        require(msg.value >= REGISTRATION_FEE, "BlockchainKYC: ETHER amount must >= REGISTRATION_FEE");
-        require(!isNull(_name), "BlockchainKYC: 'Name' must not be blank");
+        require(msg.value >= REGISTRATION_FEE, "VProof: ETHER amount must >= REGISTRATION_FEE");
+        require(nameToUser[_name] == 0, "VProof: Name has already been taken");
+        require(!isNull(_name), "VProof: 'Name' must not be blank");
         address payable _account = _msgSender();
         
 
@@ -92,7 +93,7 @@ contract BlockchainKYC is ERC721, Ownable  {
         if(msg.value > REGISTRATION_FEE) {
             uint256 _remainingBalance = msg.value.sub(REGISTRATION_FEE);
             (bool _success, ) = payable(_msgSender()).call{ value: _remainingBalance }("");
-            require(_success, "BlockchainKYC: Error while transfering exccess REGISTRATION_FEE");
+            require(_success, "VProof: Error while transfering exccess REGISTRATION_FEE");
         }
 
         tokenIds.increment();
@@ -100,6 +101,7 @@ contract BlockchainKYC is ERC721, Ownable  {
         
         _safeMint(_msgSender(), _id);
         _setTokenURI(_id, _tokenURI);
+        nameToUser[_name] = _id;
 
         if(!_isPrivate) _account = deployInstance(_name);
         return (_id, _account);
@@ -114,12 +116,15 @@ contract BlockchainKYC is ERC721, Ownable  {
         assembly {
             _size := extcodesize(_account)
         }
-        if(_size > 0) return true;
-        return false;
+        return _size > 0;
     }
 
     function getRegistrationFees() external view returns(uint256) {
         return REGISTRATION_FEE;
+    }
+
+    function setRegistrationFees(uint256 _newAmount) external onlyOwner {
+        REGISTRATION_FEE = _newAmount;
     }
 
     function withdraw(address _tokenAddress, uint256 _amount) external onlyOwner returns(bool) {
@@ -127,14 +132,14 @@ contract BlockchainKYC is ERC721, Ownable  {
             // Checks whether the "_tokenAddress" is a contract
             if(!isContract(_tokenAddress)) return false;
             (bool _success, ) = _tokenAddress.call{ value: 0 }(abi.encodeWithSignature("transfer(address,uint256)", _msgSender(), _amount));
-            require(_success, "BlockchainKYC: Error while interracting with token contract");
+            require(_success, "VProof: Error while interracting with token contract");
             return true;
         }
 
         uint256 _withdrawAmount = _amount > 0 ? _amount : _contractEtherBalance;
         _contractEtherBalance = _contractEtherBalance.sub(_withdrawAmount);
         (bool _success, ) = payable(_msgSender()).call{ value: _withdrawAmount }("");
-        require(_success, "BlockchainKYC: Ether withdrawal failed");
+        require(_success, "VProof: Ether withdrawal failed");
         return true;
     }
 

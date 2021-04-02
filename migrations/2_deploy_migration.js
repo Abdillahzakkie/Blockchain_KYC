@@ -1,5 +1,5 @@
-const BlockchainKYC = artifacts.require('BlockchainKYC');
+const VProof = artifacts.require('VProof');
 
 module.exports = async (deployer, network, accounts) => {
-    await deployer.deploy(BlockchainKYC, 'GameItem', 'ITM', { from: accounts[0] });
+    await deployer.deploy(VProof, 'VProof', 'VIP', { from: accounts[0] });
 }

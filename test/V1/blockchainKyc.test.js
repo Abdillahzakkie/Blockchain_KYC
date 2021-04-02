@@ -1,4 +1,4 @@
-const BlockchainKYC = artifacts.require('BlockchainKYC');
+const VProof = artifacts.require('VProof');
 const { expectEvent } = require("@openzeppelin/test-helpers")
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers/src/constants');
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
@@ -7,12 +7,12 @@ const { expect, assert } = require('chai');
 const toWei = _amount => web3.utils.toWei(_amount.toString());
 const fromWei = _amount => web3.utils.fromWei(_amount.toString());
 
-contract('BlockchainKYC', async ([deployer, user1, user2]) => {
-    const _name = "BlockchainKYC";
+contract('VProof', async ([deployer, user1, user2]) => {
+    const _name = "VProof";
     const _symbol = "ITM";
 
     beforeEach(async () => {
-        this.contract = await BlockchainKYC.new(_name, _symbol, { from: deployer });
+        this.contract = await VProof.new(_name, _symbol, { from: deployer });
     })
 
     describe('deployment', () => {
@@ -93,7 +93,7 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
             try {
                 await this.contract.createPrivateAccount("", _tokenURI, { from: user2, value: _amount });
             } catch (error) {
-                assert(error.message.includes("BlockchainKYC: 'Name' must not be blank"));
+                assert(error.message.includes("VProof: 'Name' must not be blank"));
                 return;
             }
             assert(false);
@@ -103,7 +103,7 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
             try {
                 await this.contract.createPrivateAccount(_name, _tokenURI, { from: user1, value: _amount });
             } catch (error) {
-                assert(error.message.includes("BlockchainKYC: Duplicate registration found!"));
+                assert(error.message.includes("VProof: Duplicate registration found!"));
                 return;
             }
             assert(false);
@@ -116,7 +116,17 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
                 ) - toWei(.002);
                 await this.contract.createPrivateAccount(_name, _tokenURI, { from: user2, value: _amount.toString() });
             } catch (error) {
-                assert(error.message.includes("BlockchainKYC: ETHER amount must >= REGISTRATION_FEE"));
+                assert(error.message.includes("VProof: ETHER amount must >= REGISTRATION_FEE"));
+                return;
+            }
+            assert(false);
+        })
+
+        it("should reject if name have already been taken", async () => {
+            try {
+                await this.contract.createPrivateAccount(_name, _tokenURI, { from: user2, value: _amount });
+            } catch (error) {
+                assert(error.message.includes("VProof: Name has already been taken"));
                 return;
             }
             assert(false);
@@ -131,7 +141,7 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
     })
 
     describe('createBussinessAccount', () => {
-        const _name = "Nameless";
+        const _name = "My Comapny";
         const _tokenURI = "TokenURI";
         let _amount;
         let _reciept;
@@ -140,7 +150,7 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
 
         beforeEach(async () => {
             _amount = (await this.contract.getRegistrationFees()).toString();
-            await this.contract.createPrivateAccount(_name, _tokenURI, { from: user1, value: _amount });
+            await this.contract.createPrivateAccount("Nameless", _tokenURI, { from: user1, value: _amount });
             _reciept = await this.contract.createBussinessAccount(_name, _tokenURI, { from: user1, value: _amount });
 
             const _result = _reciept.receipt.logs[_reciept.receipt.logs.length - 1].args;
@@ -166,10 +176,21 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
 
         it("should reject if name field is blank", async () => {
             try {
-                await this.contract.createPrivateAccount(_name, _tokenURI, { from: user2, value: _amount });
+                await this.contract.createPrivateAccount("Unknown", _tokenURI, { from: user2, value: _amount });
                 await this.contract.createBussinessAccount("", _tokenURI, { from: user2, value: _amount });
             } catch (error) {
-                assert(error.message.includes("BlockchainKYC: 'Name' must not be blank"));
+                assert(error.message.includes("VProof: 'Name' must not be blank"));
+                return;
+            }
+            assert(false);
+        })
+
+        it("should reject if name have already been taken", async () => {
+            try {
+                await this.contract.createPrivateAccount("Unknown", _tokenURI, { from: user2, value: _amount });
+                await this.contract.createBussinessAccount(_name, _tokenURI, { from: user2, value: _amount });
+            } catch (error) {
+                assert(error.message.includes("VProof: Name has already been taken"));
                 return;
             }
             assert(false);
@@ -183,7 +204,7 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
                 await this.contract.createPrivateAccount(_name, _tokenURI, { from: user2, value: _amount });
                 await this.contract.createBussinessAccount(_name, _tokenURI, { from: user2, value: _amount.toString() });
             } catch (error) {
-                assert(error.message.includes("BlockchainKYC: ETHER amount must >= REGISTRATION_FEE"));
+                assert(error.message.includes("VProof: ETHER amount must >= REGISTRATION_FEE"));
                 return;
             }
             assert(false);
@@ -196,5 +217,27 @@ contract('BlockchainKYC', async ([deployer, user1, user2]) => {
                 id: "2"
             });
         })
-    })    
+    })  
+    
+    describe('setRegistrationFees', () => {
+        beforeEach(async () => {
+            await this.contract.setRegistrationFees('0', { from: deployer });
+        })
+
+        it("should update REGISTRATION_FEE", async () => {
+            const getRegistrationFees = await this.contract.getRegistrationFees();
+            expect(getRegistrationFees.toString()).to.equal('0');
+        })
+
+        it("should reject if caller is not the owner", async () => {
+            try {
+                await this.contract.setRegistrationFees('0', { from: user1 });
+            } catch (error) {
+                assert(error.message.includes("Ownable: caller is not the owner"));
+                return; 
+            }
+            assert(false);
+        })
+    })
+    
 })
