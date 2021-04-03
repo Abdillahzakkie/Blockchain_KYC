@@ -28,9 +28,9 @@ contract VProve is ERC721, Ownable  {
     /// @notice Returns company description at the index of companies[creator][company]
     mapping(address => mapping(address => Description)) public companies;
 
-    /// @notice Returns the ID of a uniquely registered Brand name.
-    //    Returns zero for unregistered Brand
-    mapping(string => uint256) public brandNameToId;
+    /// @notice Returns the address of a uniquely registered Brand name.
+    //    Returns zero address for unregistered Brand
+    mapping(string => address) public brandNameToOwner;
 
     struct Description {
         address account;
@@ -110,7 +110,7 @@ contract VProve is ERC721, Ownable  {
         // Note:: The second result returned by _createAccount is the address of the newly deployed clone contract
         (uint256 _id, address _clonedContractAddress) = _createAccount(_brandName, _tokenURI, _isPrivate);
 
-        companies[_msgSender()][_account] = Description(
+        companies[_msgSender()][_clonedContractAddress] = Description(
             _clonedContractAddress,
             _id,
             _brandName
@@ -126,7 +126,7 @@ contract VProve is ERC721, Ownable  {
 
     function _createAccount(string calldata _brandName, string memory _tokenURI, bool _private) internal returns(uint256, address) {
         require(msg.value >= REGISTRATION_FEE, "VProve: ETHER amount must >= REGISTRATION_FEE");
-        require(brandNameToId[_brandName] == 0, "VProve: Name has already been taken");
+        require(brandNameToOwner[_brandName] == address(0), "VProve: Name has already been taken");
         require(!isNull(_brandName), "VProve: 'Name' must not be blank");
 
         address payable _account = _msgSender();
@@ -147,8 +147,8 @@ contract VProve is ERC721, Ownable  {
         _safeMint(_msgSender(), _id);
         _setTokenURI(_id, _tokenURI);
 
-        // map _brandName to token ID
-        brandNameToId[_brandName] = _id;
+        // map _brandName to owner address
+        brandNameToOwner[_brandName] = _msgSender();
 
         // checks if _private = false
         // if _private = false, create a new Company contract using "companyImplementation" above
