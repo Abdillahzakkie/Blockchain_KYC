@@ -63,7 +63,7 @@ contract Company is Context {
         admin = _msgSender();
     }
 
-    function registerNewUser(address _account, string memory _role) public onlyOwner {
+    function registerAccount(address _account, string memory _role) public onlyOwner {
         require(members[_account].account == address(0), "Account have already been created");
         tokenIds.increment();
 
@@ -76,7 +76,7 @@ contract Company is Context {
         emit NewAccountCreated(_msgSender(), _account, _newUserId, _role, block.timestamp);
     }
 
-    function removeUser(address _account) external onlyOwner {
+    function removeAccount(address _account) external onlyOwner {
         require(members[_account].account != address(0), "Account doesn't exist");
         uint256 _index = members[_account].id;
         members[_account] = Member(address(0), "", 0);
