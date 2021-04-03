@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
 
 contract Company is Context {
     using Counters for Counters.Counter;
-    using SafeMath for uint256;
     Counters.Counter public tokenIds;
 
     string public name;
