@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -49,7 +49,7 @@ contract VProve is ERC721, Ownable  {
         uint256 timestamp
     );
 
-    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) public {
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         companyImplementation = payable(new Company());
         REGISTRATION_FEE = 1 ether;
         _contractEtherBalance = 0;
