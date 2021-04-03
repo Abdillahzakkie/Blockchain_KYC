@@ -72,7 +72,6 @@ contract VProve is ERC721, Ownable  {
         return clone;
     }
     
-    /// @param _name Accept the brand name
     function createPrivateAccount(string calldata _name, string memory _tokenURI) external payable {
         require(persons[_msgSender()].account == address(0), "VProve: Account has already been registered");
 
