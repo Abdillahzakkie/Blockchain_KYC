@@ -42,13 +42,13 @@ contract("Company", async ([deployer, user1, user2, user3]) => {
         })
     })
     
-    describe('registerNewUser', () => {
+    describe('registerAccount', () => {
         const _role = "MODERATOR";
         let _reciept;
 
         beforeEach(async () => {
             await this.contract.initialize(_name, { from: user1 });
-            _reciept = await this.contract.registerNewUser(user2, _role, { from: user1 });
+            _reciept = await this.contract.registerAccount(user2, _role, { from: user1 });
         })
 
         it("should register new user", async () => {
@@ -60,7 +60,7 @@ contract("Company", async ([deployer, user1, user2, user3]) => {
 
         it("should reject if caller is not the admin", async () => {
             try {
-                await this.contract.registerNewUser(user2, _role, { from: user2 });
+                await this.contract.registerAccount(user2, _role, { from: user2 });
             } catch (error) {
                 assert(error.message.includes("Ownable: caller is not the owner"));
                 return;
@@ -78,13 +78,13 @@ contract("Company", async ([deployer, user1, user2, user3]) => {
         })
     })
     
-    describe('removeUser', () => {
+    describe('removeAccount', () => {
         let _reciept;
 
         beforeEach(async () => {
             await this.contract.initialize(_name, { from: user1 });
-            await this.contract.registerNewUser(user2, "MODERATOR", { from: user1 });
-            _reciept = await this.contract.removeUser(user2, { from: user1 });
+            await this.contract.registerAccount(user2, "MODERATOR", { from: user1 });
+            _reciept = await this.contract.removeAccount(user2, { from: user1 });
         })
 
         it("should remove account", async () => {
@@ -96,7 +96,7 @@ contract("Company", async ([deployer, user1, user2, user3]) => {
 
         it("should reject if account does not exist", async () => {
             try {
-                await this.contract.removeUser(user2, { from: user1 });
+                await this.contract.removeAccount(user2, { from: user1 });
             } catch (error) {
                 assert(error.message.includes("Account doesn't exist"));
                 return;
@@ -106,7 +106,7 @@ contract("Company", async ([deployer, user1, user2, user3]) => {
 
         it("should reject if caller is not the admin", async () => {
             try {
-                await this.contract.removeUser(user1, { from: user2 });
+                await this.contract.removeAccount(user1, { from: user2 });
             } catch (error) {
                 assert(error.message.includes("Ownable: caller is not the owner"));
                 return;
@@ -129,7 +129,7 @@ contract("Company", async ([deployer, user1, user2, user3]) => {
 
         beforeEach(async () => {
             await this.contract.initialize(_name, { from: user1 });
-            await this.contract.registerNewUser(user2, "MODERATOR", { from: user1 });
+            await this.contract.registerAccount(user2, "MODERATOR", { from: user1 });
             _reciept = await this.contract.updateRole(user2, _newRole, { from: user1 });
         })
 
