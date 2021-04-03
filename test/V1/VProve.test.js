@@ -1,4 +1,4 @@
-const VProof = artifacts.require('VProof');
+const VProve = artifacts.require('VProve');
 const { expectEvent } = require("@openzeppelin/test-helpers")
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers/src/constants');
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
@@ -7,12 +7,12 @@ const { expect, assert } = require('chai');
 const toWei = _amount => web3.utils.toWei(_amount.toString());
 const fromWei = _amount => web3.utils.fromWei(_amount.toString());
 
-contract('VProof', async ([deployer, user1, user2]) => {
-    const _name = "VProof";
+contract('VProve', async ([deployer, user1, user2]) => {
+    const _name = "VProve";
     const _symbol = "ITM";
 
     beforeEach(async () => {
-        this.contract = await VProof.new(_name, _symbol, { from: deployer });
+        this.contract = await VProve.new(_name, _symbol, { from: deployer });
     })
 
     describe('deployment', () => {
@@ -93,7 +93,7 @@ contract('VProof', async ([deployer, user1, user2]) => {
             try {
                 await this.contract.createPrivateAccount("", _tokenURI, { from: user2, value: _amount });
             } catch (error) {
-                assert(error.message.includes("VProof: 'Name' must not be blank"));
+                assert(error.message.includes("VProve: 'Name' must not be blank"));
                 return;
             }
             assert(false);
@@ -103,7 +103,7 @@ contract('VProof', async ([deployer, user1, user2]) => {
             try {
                 await this.contract.createPrivateAccount(_name, _tokenURI, { from: user1, value: _amount });
             } catch (error) {
-                assert(error.message.includes("VProof: Duplicate registration found!"));
+                assert(error.message.includes("VProve: Account has already been registered"));
                 return;
             }
             assert(false);
@@ -116,7 +116,7 @@ contract('VProof', async ([deployer, user1, user2]) => {
                 ) - toWei(.002);
                 await this.contract.createPrivateAccount(_name, _tokenURI, { from: user2, value: _amount.toString() });
             } catch (error) {
-                assert(error.message.includes("VProof: ETHER amount must >= REGISTRATION_FEE"));
+                assert(error.message.includes("VProve: ETHER amount must >= REGISTRATION_FEE"));
                 return;
             }
             assert(false);
@@ -126,7 +126,7 @@ contract('VProof', async ([deployer, user1, user2]) => {
             try {
                 await this.contract.createPrivateAccount(_name, _tokenURI, { from: user2, value: _amount });
             } catch (error) {
-                assert(error.message.includes("VProof: Name has already been taken"));
+                assert(error.message.includes("VProve: Name has already been taken"));
                 return;
             }
             assert(false);
@@ -179,7 +179,7 @@ contract('VProof', async ([deployer, user1, user2]) => {
                 await this.contract.createPrivateAccount("Unknown", _tokenURI, { from: user2, value: _amount });
                 await this.contract.createBussinessAccount("", _tokenURI, { from: user2, value: _amount });
             } catch (error) {
-                assert(error.message.includes("VProof: 'Name' must not be blank"));
+                assert(error.message.includes("VProve: 'Name' must not be blank"));
                 return;
             }
             assert(false);
@@ -190,7 +190,7 @@ contract('VProof', async ([deployer, user1, user2]) => {
                 await this.contract.createPrivateAccount("Unknown", _tokenURI, { from: user2, value: _amount });
                 await this.contract.createBussinessAccount(_name, _tokenURI, { from: user2, value: _amount });
             } catch (error) {
-                assert(error.message.includes("VProof: Name has already been taken"));
+                assert(error.message.includes("VProve: Name has already been taken"));
                 return;
             }
             assert(false);
@@ -204,7 +204,7 @@ contract('VProof', async ([deployer, user1, user2]) => {
                 await this.contract.createPrivateAccount(_name, _tokenURI, { from: user2, value: _amount });
                 await this.contract.createBussinessAccount(_name, _tokenURI, { from: user2, value: _amount.toString() });
             } catch (error) {
-                assert(error.message.includes("VProof: ETHER amount must >= REGISTRATION_FEE"));
+                assert(error.message.includes("VProve: ETHER amount must >= REGISTRATION_FEE"));
                 return;
             }
             assert(false);
@@ -239,5 +239,26 @@ contract('VProof', async ([deployer, user1, user2]) => {
             assert(false);
         })
     })
+
+    describe('brandNameToId', () => {
+        const _name = "Nameless";
+        let _amount;
+
+        beforeEach(async () => {
+            _amount = (await this.contract.getRegistrationFees()).toString();
+            await this.contract.createPrivateAccount(_name, "TokenURI", { from: user1, value: _amount });
+        })
+
+        it("should return registered brand name", async () => {
+            const brandNameToId = await this.contract.brandNameToId(_name);
+            expect(brandNameToId.toString()).to.equal("1");
+        })
+
+        it("should returns blank string if name is not registered", async () => {
+            const brandNameToId = await this.contract.brandNameToId("Unknow");
+            expect(brandNameToId.toString()).to.equal("0");
+        })
+    })
+    
     
 })

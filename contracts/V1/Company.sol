@@ -57,7 +57,7 @@ contract Company is Context {
     );
 
     receive() external payable {
-        revert("BlockchainKYC: Direct ETH transfer is not allowed");
+        revert("Direct ETH transfer is not allowed");
     }
 
     function initialize(string calldata _name) external initializer {
