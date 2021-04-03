@@ -10,8 +10,6 @@ import "./Company.sol";
 
 /// @title Vprove A Unique Name Token
 /// @author Zakriyya Abdullah (DragonLord)
-/// @notice This contract create both private accoount and company account
-/// @dev All function calls are currently implemented without side effects
 contract VProve is ERC721, Ownable  {
     using Counters for Counters.Counter;
     using SafeMath for uint256;
