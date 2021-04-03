@@ -240,7 +240,7 @@ contract('VProve', async ([deployer, user1, user2]) => {
         })
     })
 
-    describe('brandNameToId', () => {
+    describe('nameToOwner', () => {
         const _name = "Nameless";
         let _amount;
 
@@ -250,13 +250,13 @@ contract('VProve', async ([deployer, user1, user2]) => {
         })
 
         it("should return registered brand name", async () => {
-            const brandNameToOwner = await this.contract.brandNameToOwner(_name);
-            expect(brandNameToOwner).to.equal(user1);
+            const nameToOwner = await this.contract.nameToOwner(_name);
+            expect(nameToOwner).to.equal(user1);
         })
 
         it("should returns blank string if name is not registered", async () => {
-            const brandNameToOwner = await this.contract.brandNameToOwner("Unknow");
-            expect(brandNameToOwner.toString()).to.equal(ZERO_ADDRESS);
+            const nameToOwner = await this.contract.nameToOwner("Unknow");
+            expect(nameToOwner.toString()).to.equal(ZERO_ADDRESS);
         })
     })
     

@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Company.sol";
 
-/// @title Vprove A Unique Name Token
+/// @title Vprove (A Unique Name Token)
 /// @author Zakriyya Abdullah (DragonLord)
 contract VProve is ERC721, Ownable  {
     using Counters for Counters.Counter;
@@ -26,9 +26,9 @@ contract VProve is ERC721, Ownable  {
     /// @notice Returns company description at the index of companies[creator][company]
     mapping(address => mapping(address => Description)) public companies;
 
-    /// @notice Returns the address of a uniquely registered Brand name.
-    //    Returns zero address for unregistered Brand
-    mapping(string => address) public brandNameToOwner;
+    /// @notice Returns the address of a uniquely registered Name.
+    //    Returns zero address for unregistered Name
+    mapping(string => address) public nameToOwner;
 
     struct Description {
         address account;
@@ -49,8 +49,6 @@ contract VProve is ERC721, Ownable  {
         uint256 timestamp
     );
 
-    /// @param _name Set name of VProve NFT
-    /// @param _symbol Set symbol of VProve NFT
     constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) public {
         companyImplementation = payable(new Company());
         REGISTRATION_FEE = 1 ether;
@@ -61,14 +59,14 @@ contract VProve is ERC721, Ownable  {
         revert("VProve: Direct ETH transfer is not allowed");
     }
 
-    /// @param _brandName Accept brand name and passes it to the initialize method of the newly deployed clone contract
+    /// @param _name Accept name and passes it to the initialize method of the newly deployed clone contract
     /// @return Returns the address of the newly deployed clone contract
-    function deployInstance(string calldata _brandName) internal returns(address payable) {
+    function deployInstance(string calldata _name) internal returns(address payable) {
         // creates a new clone using the deployed companyImplementation contracts in the constructor
         address payable clone = payable(Clones.clone(companyImplementation));
 
         // initialize the newly deployed clone contract
-        Company(clone).initialize(_brandName);
+        Company(clone).initialize(_name);
 
         // returns the clone address
         return clone;
@@ -98,7 +96,7 @@ contract VProve is ERC721, Ownable  {
         emit NewAccountCreated(_msgSender(), _id, block.timestamp);
     }
 
-    function createBussinessAccount(string calldata _brandName, string memory _tokenURI) external payable {
+    function createBussinessAccount(string calldata _name, string memory _tokenURI) external payable {
         require(persons[_msgSender()].account != address(0), "VProve: User not registered");
 
         // A flag variable that tracks whether the newly account to be created is Private or Business account
@@ -106,12 +104,12 @@ contract VProve is ERC721, Ownable  {
 
         // _createAccount returns the ID of the newly created user and address of the user.
         // Note:: The second result returned by _createAccount is the address of the newly deployed clone contract
-        (uint256 _id, address _clonedContractAddress) = _createAccount(_brandName, _tokenURI, _isPrivate);
+        (uint256 _id, address _clonedContractAddress) = _createAccount(_name, _tokenURI, _isPrivate);
 
         companies[_msgSender()][_clonedContractAddress] = Description(
             _clonedContractAddress,
             _id,
-            _brandName
+            _name
         );
 
         // emit an event with three arguments:
@@ -122,10 +120,10 @@ contract VProve is ERC721, Ownable  {
         emit NewComapanyCreated(_msgSender(), _clonedContractAddress, _id, block.timestamp);
     }
 
-    function _createAccount(string calldata _brandName, string memory _tokenURI, bool _private) internal returns(uint256, address) {
+    function _createAccount(string calldata _name, string memory _tokenURI, bool _private) internal returns(uint256, address) {
         require(msg.value >= REGISTRATION_FEE, "VProve: ETHER amount must >= REGISTRATION_FEE");
-        require(brandNameToOwner[_brandName] == address(0), "VProve: Name has already been taken");
-        require(!isNull(_brandName), "VProve: 'Name' must not be blank");
+        require(nameToOwner[_name] == address(0), "VProve: Name has already been taken");
+        require(!isNull(_name), "VProve: 'Name' must not be blank");
 
         address payable _account = _msgSender();
 
@@ -145,12 +143,12 @@ contract VProve is ERC721, Ownable  {
         _safeMint(_msgSender(), _id);
         _setTokenURI(_id, _tokenURI);
 
-        // map _brandName to owner address
-        brandNameToOwner[_brandName] = _msgSender();
+        // map _name to owner address
+        nameToOwner[_name] = _msgSender();
 
         // checks if _private = false
         // if _private = false, create a new Company contract using "companyImplementation" above
-        if(!_private) _account = deployInstance(_brandName);
+        if(!_private) _account = deployInstance(_name);
 
         // return token ID and the _account
         // Note:: _account = _msgSender() if isPrivate = true
