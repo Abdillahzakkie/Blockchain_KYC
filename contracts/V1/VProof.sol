@@ -51,7 +51,7 @@ contract VProve is ERC721, Ownable  {
 
     constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         companyImplementation = payable(new Company());
-        REGISTRATION_FEE = 1 ether;
+        REGISTRATION_FEE = 100000000000000000;
         _contractEtherBalance = 0;
     }
 

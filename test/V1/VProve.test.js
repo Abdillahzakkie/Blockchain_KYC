@@ -35,7 +35,7 @@ contract('VProve', async ([deployer, user1, user2]) => {
 
         it('should set REGISTRATION_FEE to ZERO', async () => {
             const getRegistrationFees = await this.contract.getRegistrationFees();
-            expect(getRegistrationFees.toString()).to.equal(toWei(1));
+            expect(getRegistrationFees.toString()).to.equal(toWei(0.1));
         })
 
         it('should set _contractEtherBalance to ZERO', async () => {
