@@ -6,11 +6,13 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
 import "./Company.sol";
 
 /// @title Vprove (A Unique Name Token)
 /// @author Zakriyya Abdullah (DragonLord)
-contract VProve is ERC721, Ownable  {
+contract VProve is ERC721, Ownable, ReentrancyGuard  {
     using Counters for Counters.Counter;
     using SafeMath for uint256;
     Counters.Counter public tokenIds;
@@ -72,7 +74,7 @@ contract VProve is ERC721, Ownable  {
         return clone;
     }
     
-    function createPrivateAccount(string calldata _name, string memory _tokenURI) external payable {
+    function createPrivateAccount(string calldata _name, string memory _tokenURI) external nonReentrant payable {
         require(persons[_msgSender()].account == address(0), "VProve: Account has already been registered");
 
         // A flag variable that tracks whether the newly account to be created is Private or Business account
@@ -95,7 +97,7 @@ contract VProve is ERC721, Ownable  {
         emit NewAccountCreated(_msgSender(), _id, block.timestamp);
     }
 
-    function createBussinessAccount(string calldata _name, string memory _tokenURI) external payable {
+    function createBussinessAccount(string calldata _name, string memory _tokenURI) external nonReentrant payable {
         require(persons[_msgSender()].account != address(0), "VProve: User not registered");
 
         // A flag variable that tracks whether the newly account to be created is Private or Business account
